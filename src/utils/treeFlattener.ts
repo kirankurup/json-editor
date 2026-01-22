@@ -66,7 +66,6 @@ export function flattenJSON(
     // Start with root object/array
     if (typeof json === 'object') {
       const isArray = Array.isArray(json)
-      const rootType: NodeType = isArray ? 'array' : 'object'
       const rootId = ''
 
       // Auto-expand root by default

@@ -6,7 +6,7 @@ export interface TreeNode {
   key: string
   value: any
   type: NodeType
-  path: string[]
+  path: (string | number)[]
   isExpanded: boolean
   isTruncated: boolean
   isValueExpanded: boolean
