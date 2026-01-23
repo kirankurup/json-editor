@@ -12,8 +12,11 @@ import { useSearch } from '@/hooks/useSearch'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
 import { useAutoRepair } from '@/hooks/useAutoRepair'
+import { useCaseConversion } from '@/hooks/useCaseConversion'
 import { PreviewModal } from '@/components/PreviewModal'
+import { CaseConversionDialog } from '@/components/CaseConversionDialog'
 import { flattenJSON } from '@/utils/treeFlattener'
+import type { CaseDirection, CaseDepth } from '@/types'
 import './App.css'
 
 function App() {
@@ -47,6 +50,7 @@ function App() {
   } = useTreeState(parsedJson, searchState)
 
   const autoRepair = useAutoRepair()
+  const caseConversion = useCaseConversion()
 
   // Reset error banner visibility when parseError changes
   useEffect(() => {
@@ -104,12 +108,18 @@ function App() {
   }, [applyMutation, autoRepair])
 
   const handleCaseConversion = useCallback(() => {
-    // Will implement with CaseConversionModal in next task
-    toast({
-      title: 'Case conversion',
-      description: 'Coming soon - will show case conversion modal',
-    })
-  }, [toast])
+    if (!parsedJson) return
+    caseConversion.startConversion()
+  }, [parsedJson, caseConversion])
+
+  const handleConvert = useCallback((direction: CaseDirection, depth: CaseDepth) => {
+    caseConversion.convert(jsonText, parsedJson, direction, depth)
+  }, [jsonText, parsedJson, caseConversion])
+
+  const handleAcceptConversion = useCallback(() => {
+    applyMutation(caseConversion.converted)
+    caseConversion.closePreview()
+  }, [applyMutation, caseConversion])
 
   const handleCopyPath = useCallback((path: string) => {
     navigator.clipboard.writeText(path)
@@ -188,6 +198,21 @@ function App() {
         modified={autoRepair.repaired}
         title="Auto-Repair Preview"
         onAccept={handleAcceptRepair}
+      />
+
+      <CaseConversionDialog
+        isOpen={caseConversion.isDialogOpen}
+        onClose={caseConversion.closeDialog}
+        onConvert={handleConvert}
+      />
+
+      <PreviewModal
+        isOpen={caseConversion.isPreviewOpen}
+        onClose={caseConversion.closePreview}
+        original={caseConversion.original}
+        modified={caseConversion.converted}
+        title="Case Conversion Preview"
+        onAccept={handleAcceptConversion}
       />
 
       <Toaster />
