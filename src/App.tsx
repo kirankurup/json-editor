@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useCallback, useEffect } from 'react'
+import { useState, useCallback, useEffect, useMemo } from 'react'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { Header } from '@/components/Header'
 import { Toolbar } from '@/components/Toolbar'
@@ -8,8 +8,12 @@ import { TreeView } from '@/components/TreeView'
 import { ErrorBanner } from '@/components/ErrorBanner'
 import { useJsonEditor } from '@/hooks/useJsonEditor'
 import { useTreeState } from '@/hooks/useTreeState'
+import { useSearch } from '@/hooks/useSearch'
 import { useToast } from '@/hooks/use-toast'
 import { Toaster } from '@/components/ui/toaster'
+import { useAutoRepair } from '@/hooks/useAutoRepair'
+import { PreviewModal } from '@/components/PreviewModal'
+import { flattenJSON } from '@/utils/treeFlattener'
 import './App.css'
 
 function App() {
@@ -21,15 +25,28 @@ function App() {
     setJsonText,
     parsedJson,
     parseError,
+    applyMutation,
     undo,
     canUndo,
   } = useJsonEditor()
 
+  // Create base nodes for search (without expansion state)
+  const baseNodes = useMemo(() => {
+    if (!parsedJson) return []
+    return flattenJSON(parsedJson, new Set())
+  }, [parsedJson])
+
+  // Initialize search
+  const { searchState, search, next, previous, clear } = useSearch(baseNodes)
+
+  // Use tree state with search
   const {
     nodes,
     toggleExpanded,
     toggleValueExpanded,
-  } = useTreeState(parsedJson)
+  } = useTreeState(parsedJson, searchState)
+
+  const autoRepair = useAutoRepair()
 
   // Reset error banner visibility when parseError changes
   useEffect(() => {
@@ -68,10 +85,29 @@ function App() {
   }, [setJsonText, toast])
 
   const handleAutoRepair = useCallback(() => {
-    // Will implement with PreviewModal in next task
+    if (!parseError) return
+    try {
+      autoRepair.startRepair(jsonText)
+    } catch (error) {
+      toast({
+        title: 'Auto-repair failed',
+        description: 'Could not repair this JSON',
+        variant: 'destructive',
+      })
+    }
+  }, [jsonText, parseError, autoRepair, toast])
+
+  const handleAcceptRepair = useCallback(() => {
+    applyMutation(autoRepair.repaired)
+    autoRepair.close()
+    setShowErrorBanner(true) // Re-show banner if new errors
+  }, [applyMutation, autoRepair])
+
+  const handleCaseConversion = useCallback(() => {
+    // Will implement with CaseConversionModal in next task
     toast({
-      title: 'Auto-repair',
-      description: 'Coming soon - will show preview modal',
+      title: 'Case conversion',
+      description: 'Coming soon - will show case conversion modal',
     })
   }, [toast])
 
@@ -103,8 +139,16 @@ function App() {
       <Toolbar
         onAutoRepair={handleAutoRepair}
         onUndo={undo}
+        onCaseConversion={handleCaseConversion}
         canUndo={canUndo}
         hasError={!!parseError}
+        hasValidJson={!!parsedJson}
+        onSearch={search}
+        onSearchNext={next}
+        onSearchPrevious={previous}
+        onSearchClear={clear}
+        searchMatchCount={searchState.matchingNodeIds.length}
+        searchCurrentIndex={searchState.currentMatchIndex}
       />
 
       <ResizablePanelGroup direction="horizontal" className="flex-1">
@@ -136,6 +180,15 @@ function App() {
           onDismiss={() => setShowErrorBanner(false)}
         />
       )}
+
+      <PreviewModal
+        isOpen={autoRepair.isOpen}
+        onClose={autoRepair.close}
+        original={autoRepair.original}
+        modified={autoRepair.repaired}
+        title="Auto-Repair Preview"
+        onAccept={handleAcceptRepair}
+      />
 
       <Toaster />
     </div>

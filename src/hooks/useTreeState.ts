@@ -1,7 +1,8 @@
 import { useState, useCallback, useMemo } from 'react'
 import { flattenJSON } from '@/utils/treeFlattener'
+import type { SearchState } from '@/types'
 
-export function useTreeState(parsedJson: any) {
+export function useTreeState(parsedJson: any, searchState?: SearchState) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [expandedValues, setExpandedValues] = useState<Set<string>>(new Set())
 
@@ -31,13 +32,22 @@ export function useTreeState(parsedJson: any) {
 
   const nodes = useMemo(() => {
     if (!parsedJson) return []
-    const flattened = flattenJSON(parsedJson, expandedIds)
-    // Apply value expansion state
+
+    // Convert searchState to format expected by flattenJSON
+    const searchData = searchState ? {
+      query: searchState.query,
+      matchingNodeIds: new Set(searchState.matchingNodeIds),
+      currentMatchId: searchState.currentMatchIndex >= 0
+        ? searchState.matchingNodeIds[searchState.currentMatchIndex]
+        : null,
+    } : undefined
+
+    const flattened = flattenJSON(parsedJson, expandedIds, searchData)
     return flattened.map(node => ({
       ...node,
       isValueExpanded: expandedValues.has(node.id)
     }))
-  }, [parsedJson, expandedIds, expandedValues])
+  }, [parsedJson, expandedIds, expandedValues, searchState])
 
   return {
     nodes,
