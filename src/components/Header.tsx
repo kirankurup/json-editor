@@ -17,8 +17,8 @@ export function Header({ onFileUpload }: HeaderProps) {
   }
 
   return (
-    <header className="border-b bg-white px-4 py-3 flex items-center justify-between">
-      <h1 className="text-xl font-semibold">JSON Viewer & Editor</h1>
+    <header className="border-b border-border bg-background px-4 py-3 flex items-center justify-between">
+      <h1 className="text-xl font-semibold text-foreground">JSON Viewer & Editor</h1>
 
       <div>
         <input

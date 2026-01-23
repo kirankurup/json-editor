@@ -16,15 +16,15 @@ export function ErrorBanner({ error, onAutoRepair, onDismiss }: ErrorBannerProps
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 bg-red-50 border-t border-red-200 px-4 py-3 flex items-center justify-between shadow-lg"
+      className="fixed bottom-0 left-0 right-0 bg-red-50 dark:bg-red-950/30 border-t border-red-200 dark:border-red-900 px-4 py-3 flex items-center justify-between shadow-lg"
       role="alert"
       aria-live="polite"
     >
       <div className="flex items-center gap-3">
-        <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
+        <AlertCircle className="w-5 h-5 text-red-600 dark:text-red-400 flex-shrink-0" />
         <div>
-          <p className="text-sm font-medium text-red-900">Invalid JSON</p>
-          <p className="text-sm text-red-700">{errorMessage}</p>
+          <p className="text-sm font-medium text-red-900 dark:text-red-200">Invalid JSON</p>
+          <p className="text-sm text-red-700 dark:text-red-300">{errorMessage}</p>
         </div>
       </div>
 

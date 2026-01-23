@@ -33,7 +33,7 @@ export function Toolbar({
   searchCurrentIndex,
 }: ToolbarProps) {
   return (
-    <div className="border-b bg-white px-4 py-2 flex items-center gap-2">
+    <div className="border-b border-border bg-background px-4 py-2 flex items-center gap-2">
       <Button
         onClick={onAutoRepair}
         variant="outline"

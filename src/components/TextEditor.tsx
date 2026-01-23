@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { EditorView, basicSetup } from 'codemirror'
 import { json } from '@codemirror/lang-json'
 import { EditorState } from '@codemirror/state'
@@ -14,6 +14,17 @@ interface TextEditorProps {
 export function TextEditor({ value, onChange, parseError }: TextEditorProps) {
   const editorRef = useRef<HTMLDivElement>(null)
   const viewRef = useRef<EditorView | null>(null)
+  const [isDark, setIsDark] = useState(
+    window.matchMedia('(prefers-color-scheme: dark)').matches
+  )
+
+  // Listen for system theme changes
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+    const handler = (e: MediaQueryListEvent) => setIsDark(e.matches)
+    mediaQuery.addEventListener('change', handler)
+    return () => mediaQuery.removeEventListener('change', handler)
+  }, [])
 
   useEffect(() => {
     if (!editorRef.current) return
@@ -33,10 +44,35 @@ export function TextEditor({ value, onChange, parseError }: TextEditorProps) {
           '&': {
             height: '100%',
             fontSize: '14px',
+            backgroundColor: isDark ? '#0f172a' : '#ffffff',
+            color: isDark ? '#e2e8f0' : '#0f172a',
           },
           '.cm-scroller': {
             overflow: 'auto',
             fontFamily: 'ui-monospace, monospace',
+          },
+          '.cm-gutters': {
+            backgroundColor: isDark ? '#1e293b' : '#f1f5f9',
+            color: isDark ? '#94a3b8' : '#64748b',
+            border: 'none',
+          },
+          '.cm-activeLineGutter': {
+            backgroundColor: isDark ? '#334155' : '#e2e8f0',
+          },
+          '.cm-activeLine': {
+            backgroundColor: isDark ? '#1e293b' : '#f8fafc',
+          },
+          '.cm-content': {
+            caretColor: isDark ? '#60a5fa' : '#3b82f6',
+          },
+          '.cm-cursor': {
+            borderLeftColor: isDark ? '#60a5fa' : '#3b82f6',
+          },
+          '.cm-selectionBackground, ::selection': {
+            backgroundColor: isDark ? '#334155' : '#dbeafe',
+          },
+          '&.cm-focused .cm-selectionBackground, &.cm-focused ::selection': {
+            backgroundColor: isDark ? '#334155' : '#bfdbfe',
           },
         }),
       ],
@@ -53,7 +89,7 @@ export function TextEditor({ value, onChange, parseError }: TextEditorProps) {
       view.destroy()
       viewRef.current = null
     }
-  }, []) // Only create once
+  }, [isDark, onChange, value]) // Recreate when theme changes
 
   // Update editor content when value prop changes externally
   useEffect(() => {
@@ -80,7 +116,7 @@ export function TextEditor({ value, onChange, parseError }: TextEditorProps) {
   return (
     <div
       ref={editorRef}
-      className="h-full w-full overflow-hidden border-r"
+      className="h-full w-full overflow-hidden border-r border-border"
       data-testid="text-editor"
     />
   )

@@ -57,7 +57,7 @@ export function SearchBar({
   return (
     <div className="flex items-center gap-2 ml-auto">
       <div className="relative">
-        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-gray-400" />
+        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-4 h-4 text-muted-foreground" />
         <Input
           type="text"
           placeholder="Search..."
@@ -70,17 +70,17 @@ export function SearchBar({
         {query && (
           <button
             onClick={handleClear}
-            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-gray-100 rounded"
+            className="absolute right-2 top-1/2 transform -translate-y-1/2 p-1 hover:bg-muted rounded"
             aria-label="Clear search"
           >
-            <X className="w-3 h-3 text-gray-500" />
+            <X className="w-3 h-3 text-muted-foreground" />
           </button>
         )}
       </div>
 
       {showResults && (
         <>
-          <span className="text-sm text-gray-600 min-w-20">
+          <span className="text-sm text-muted-foreground min-w-20">
             {hasMatches
               ? `${currentIndex + 1} / ${matchCount}`
               : '0 results'}

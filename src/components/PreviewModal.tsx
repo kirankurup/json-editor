@@ -38,14 +38,14 @@ export function PreviewModal({
 
         <div className="flex-1 overflow-auto grid grid-cols-2 gap-4">
           <div>
-            <h3 className="text-sm font-medium mb-2">Original</h3>
-            <pre className="text-xs bg-gray-50 p-4 rounded border overflow-auto max-h-96">
+            <h3 className="text-sm font-medium mb-2 text-foreground">Original</h3>
+            <pre className="text-xs bg-muted p-4 rounded border border-border overflow-auto max-h-96 text-foreground">
               {diff.map((part, index) => (
                 <span
                   key={index}
                   className={
                     part.removed
-                      ? 'bg-red-100 text-red-800'
+                      ? 'bg-red-100 dark:bg-red-900/30 text-red-800 dark:text-red-300'
                       : part.added
                       ? ''
                       : ''
@@ -58,14 +58,14 @@ export function PreviewModal({
           </div>
 
           <div>
-            <h3 className="text-sm font-medium mb-2">Modified</h3>
-            <pre className="text-xs bg-gray-50 p-4 rounded border overflow-auto max-h-96">
+            <h3 className="text-sm font-medium mb-2 text-foreground">Modified</h3>
+            <pre className="text-xs bg-muted p-4 rounded border border-border overflow-auto max-h-96 text-foreground">
               {diff.map((part, index) => (
                 <span
                   key={index}
                   className={
                     part.added
-                      ? 'bg-green-100 text-green-800'
+                      ? 'bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-300'
                       : part.removed
                       ? ''
                       : ''
