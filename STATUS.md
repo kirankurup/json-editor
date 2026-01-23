@@ -24,22 +24,20 @@
 
 ## Known Issues
 
-### Task 9 (Case Conversion)
-**Priority: Important**
-- Missing error handling in `useCaseConversion.ts` convert function
-- Uses `any` type for parsedJson parameter
-- No tests for hook
+**All critical and important issues have been fixed!**
 
-### Task 10 (Search)
-**Priority: Critical**
-- Search doesn't auto-scroll to current match in virtualized view
-- Search doesn't auto-expand collapsed parent nodes containing matches
-- Missing keyboard shortcuts (Enter/Escape)
-- No "0 results" feedback
+### ✅ Fixed (2026-01-22)
+- ✅ Task 10: Auto-scroll to current match
+- ✅ Task 10: Auto-expand collapsed parent nodes
+- ✅ Task 10: Keyboard shortcuts (Enter/Shift+Enter/Escape)
+- ✅ Task 10: "0 results" feedback
+- ✅ Task 9: Error handling in convert function
+- ✅ Task 9: Proper typing (unknown instead of any)
+- ✅ Task 8: useMemo for diff calculation
 
-### Task 8 (Auto-Repair)
-**Priority: Optional**
-- Missing `useMemo` for diff calculation (minor performance)
+### Remaining (Low Priority)
+- No tests for useCaseConversion hook (nice to have)
+- No tests for useSearch hook (nice to have)
 
 ## Remaining Work
 
