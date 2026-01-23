@@ -17,6 +17,7 @@ export function Toolbar({ onAutoRepair, onUndo, canUndo, hasError }: ToolbarProp
         variant="outline"
         size="sm"
         disabled={!hasError}
+        aria-label={hasError ? "Auto-repair JSON errors" : "No errors to repair"}
       >
         <Wrench className="w-4 h-4 mr-2" />
         Auto-Repair
@@ -27,6 +28,7 @@ export function Toolbar({ onAutoRepair, onUndo, canUndo, hasError }: ToolbarProp
         variant="outline"
         size="sm"
         disabled={!canUndo}
+        aria-label={canUndo ? "Undo last change" : "No changes to undo"}
       >
         <Undo className="w-4 h-4 mr-2" />
         Undo

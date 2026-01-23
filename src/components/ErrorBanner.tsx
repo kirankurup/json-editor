@@ -15,7 +15,11 @@ export function ErrorBanner({ error, onAutoRepair, onDismiss }: ErrorBannerProps
     : error.message
 
   return (
-    <div className="fixed bottom-0 left-0 right-0 bg-red-50 border-t border-red-200 px-4 py-3 flex items-center justify-between shadow-lg">
+    <div
+      className="fixed bottom-0 left-0 right-0 bg-red-50 border-t border-red-200 px-4 py-3 flex items-center justify-between shadow-lg"
+      role="alert"
+      aria-live="polite"
+    >
       <div className="flex items-center gap-3">
         <AlertCircle className="w-5 h-5 text-red-600 flex-shrink-0" />
         <div>

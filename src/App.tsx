@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useCallback } from 'react'
+import { useState, useCallback, useEffect } from 'react'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { Header } from '@/components/Header'
 import { Toolbar } from '@/components/Toolbar'
@@ -31,6 +31,13 @@ function App() {
     toggleValueExpanded,
   } = useTreeState(parsedJson)
 
+  // Reset error banner visibility when parseError changes
+  useEffect(() => {
+    if (parseError) {
+      setShowErrorBanner(true)
+    }
+  }, [parseError])
+
   const handleFileUpload = useCallback((file: File) => {
     const reader = new FileReader()
 
@@ -49,6 +56,14 @@ function App() {
       setJsonText(content)
     }
 
+    reader.onerror = () => {
+      toast({
+        title: 'File read error',
+        description: 'Failed to read the file. Please try again.',
+        variant: 'destructive',
+      })
+    }
+
     reader.readAsText(file)
   }, [setJsonText, toast])
 
@@ -62,11 +77,20 @@ function App() {
 
   const handleCopyPath = useCallback((path: string) => {
     navigator.clipboard.writeText(path)
-    toast({
-      title: 'Path copied!',
-      description: path,
-      duration: 2000,
-    })
+      .then(() => {
+        toast({
+          title: 'Path copied!',
+          description: path,
+          duration: 2000,
+        })
+      })
+      .catch(() => {
+        toast({
+          title: 'Copy failed',
+          description: 'Unable to copy to clipboard',
+          variant: 'destructive',
+        })
+      })
   }, [toast])
 
   const emptyMessage = parseError

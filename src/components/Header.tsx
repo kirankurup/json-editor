@@ -29,7 +29,11 @@ export function Header({ onFileUpload }: HeaderProps) {
           className="hidden"
         />
         <Button asChild variant="outline" size="sm">
-          <label htmlFor="file-upload" className="cursor-pointer flex items-center gap-2">
+          <label
+            htmlFor="file-upload"
+            className="cursor-pointer flex items-center gap-2"
+            aria-label="Upload JSON file"
+          >
             <Upload className="w-4 h-4" />
             Upload File
           </label>
