@@ -1,10 +1,18 @@
 export type NodeType = 'object' | 'array' | 'primitive'
 
+export type JSONValue =
+  | string
+  | number
+  | boolean
+  | null
+  | JSONValue[]
+  | { [key: string]: JSONValue }
+
 export interface TreeNode {
   id: string
   depth: number
   key: string
-  value: any
+  value: JSONValue
   type: NodeType
   path: (string | number)[]
   isExpanded: boolean

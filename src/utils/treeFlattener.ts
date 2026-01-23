@@ -1,8 +1,9 @@
-import type { TreeNode, NodeType } from '@/types'
+import type { TreeNode, NodeType, JSONValue } from '@/types'
 
-const TRUNCATE_LENGTH = 100
+// Minimum length to consider for truncation - actual truncation is dynamic based on width
+const MIN_TRUNCATE_LENGTH = 50
 
-function getNodeType(value: any): NodeType {
+function getNodeType(value: JSONValue): NodeType {
   if (value === null || typeof value !== 'object') return 'primitive'
   if (Array.isArray(value)) return 'array'
   return 'object'
@@ -13,7 +14,7 @@ function generateNodeId(path: (string | number)[]): string {
 }
 
 export function flattenJSON(
-  json: any,
+  json: JSONValue,
   expandedIds?: Set<string>,
   searchState?: { query: string; matchingNodeIds: Set<string>; currentMatchId: string | null }
 ): TreeNode[] {
@@ -22,7 +23,7 @@ export function flattenJSON(
   const ids = expandedIds ?? new Set<string>()
 
   function traverse(
-    value: any,
+    value: JSONValue,
     key: string,
     path: (string | number)[],
     depth: number
@@ -31,8 +32,15 @@ export function flattenJSON(
     const type = getNodeType(value)
     const isExpanded = autoExpandAll || ids.has(nodeId)
 
-    const isString = typeof value === 'string'
-    const isTruncated = isString && value.length > TRUNCATE_LENGTH
+    // Check if the JSON stringified value might need truncation
+    // Actual truncation point is calculated dynamically in the component based on available width
+    let isTruncated = false
+    if (type === 'primitive') {
+      let stringValue = JSON.stringify(value)
+      // Replace newlines for display purposes in length calculation
+      stringValue = stringValue.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+      isTruncated = stringValue.length > MIN_TRUNCATE_LENGTH
+    }
 
     const node: TreeNode = {
       id: nodeId,
@@ -51,12 +59,12 @@ export function flattenJSON(
     nodes.push(node)
 
     // Only traverse children if node is expanded (or should be by default)
-    if (type === 'object' && isExpanded) {
-      for (const [childKey, childValue] of Object.entries(value)) {
+    if (type === 'object' && isExpanded && value !== null && typeof value === 'object') {
+      for (const [childKey, childValue] of Object.entries(value as Record<string, JSONValue>)) {
         traverse(childValue, childKey, [...path, childKey], depth + 1)
       }
     } else if (type === 'array' && isExpanded) {
-      value.forEach((item: any, index: number) => {
+      (value as JSONValue[]).forEach((item: JSONValue, index: number) => {
         traverse(item, String(index), [...path, index], depth + 1)
       })
     }
@@ -74,7 +82,7 @@ export function flattenJSON(
       }
 
       if (isArray) {
-        json.forEach((item: any, index: number) => {
+        (json as JSONValue[]).forEach((item: JSONValue, index: number) => {
           traverse(item, String(index), [index], 0)
         })
       } else {
@@ -84,6 +92,10 @@ export function flattenJSON(
       }
     } else {
       // Primitive root value
+      let stringValue = JSON.stringify(json)
+      stringValue = stringValue.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+      const isTruncated = stringValue.length > MIN_TRUNCATE_LENGTH
+
       nodes.push({
         id: 'root',
         depth: 0,
@@ -92,7 +104,7 @@ export function flattenJSON(
         type: 'primitive',
         path: [],
         isExpanded: false,
-        isTruncated: typeof json === 'string' && json.length > TRUNCATE_LENGTH,
+        isTruncated,
         isValueExpanded: false,
         isHighlighted: false,
         isCurrentMatch: false,

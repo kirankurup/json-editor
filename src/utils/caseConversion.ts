@@ -1,4 +1,4 @@
-import type { CaseDirection, CaseDepth } from '@/types'
+import type { CaseDirection, CaseDepth, JSONValue } from '@/types'
 
 export function snakeToCamel(str: string): string {
   return str.replace(/_([a-z])/g, (_, letter) => letter.toUpperCase())
@@ -13,11 +13,11 @@ function convertKey(key: string, direction: CaseDirection): string {
 }
 
 export function convertCase(
-  obj: any,
+  obj: JSONValue,
   direction: CaseDirection,
   depth: CaseDepth,
   currentDepth = 0
-): any {
+): JSONValue {
   if (obj === null || typeof obj !== 'object') {
     return obj
   }
@@ -29,7 +29,7 @@ export function convertCase(
     return obj.map(item => convertCase(item, direction, depth, currentDepth))
   }
 
-  const result: Record<string, any> = {}
+  const result: Record<string, JSONValue> = {}
 
   for (const [key, value] of Object.entries(obj)) {
     const newKey = currentDepth === 0 || depth === 'deep'

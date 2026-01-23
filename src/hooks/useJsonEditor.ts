@@ -1,11 +1,11 @@
 import { useState, useCallback, useEffect } from 'react'
-import type { ParseError, UndoEntry } from '@/types'
+import type { ParseError, UndoEntry, JSONValue } from '@/types'
 
 const MAX_UNDO_STACK = 20
 
 export function useJsonEditor() {
   const [jsonText, setJsonTextInternal] = useState('')
-  const [parsedJson, setParsedJson] = useState<any>(null)
+  const [parsedJson, setParsedJson] = useState<JSONValue | null>(null)
   const [parseError, setParseError] = useState<ParseError | null>(null)
   const [undoStack, setUndoStack] = useState<UndoEntry[]>([])
 

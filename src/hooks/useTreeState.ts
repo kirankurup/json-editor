@@ -1,8 +1,8 @@
 import { useState, useCallback, useMemo, useEffect } from 'react'
 import { flattenJSON } from '@/utils/treeFlattener'
-import type { SearchState } from '@/types'
+import type { SearchState, JSONValue } from '@/types'
 
-export function useTreeState(parsedJson: any, searchState?: SearchState) {
+export function useTreeState(parsedJson: JSONValue | null, searchState?: SearchState) {
   const [expandedIds, setExpandedIds] = useState<Set<string>>(new Set())
   const [expandedValues, setExpandedValues] = useState<Set<string>>(new Set())
 
@@ -30,7 +30,7 @@ export function useTreeState(parsedJson: any, searchState?: SearchState) {
         return next
       })
     }
-  }, [searchState?.matchingNodeIds])
+  }, [searchState])
 
   const toggleExpanded = useCallback((nodeId: string) => {
     setExpandedIds(prev => {

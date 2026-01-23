@@ -1,7 +1,7 @@
 // src/hooks/useCaseConversion.ts
 import { useState, useCallback } from 'react'
 import { convertCase as convertCaseUtil } from '@/utils/caseConversion'
-import type { CaseDirection, CaseDepth } from '@/types'
+import type { CaseDirection, CaseDepth, JSONValue } from '@/types'
 
 export function useCaseConversion() {
   const [isDialogOpen, setIsDialogOpen] = useState(false)
@@ -25,11 +25,11 @@ export function useCaseConversion() {
         throw new Error('Cannot convert case: JSON is null or undefined')
       }
 
-      if (typeof parsedJson !== 'object') {
+      if (parsedJson === null || typeof parsedJson !== 'object') {
         throw new Error('Cannot convert case: JSON must be an object or array')
       }
 
-      const convertedObj = convertCaseUtil(parsedJson, direction, depth)
+      const convertedObj = convertCaseUtil(parsedJson as JSONValue, direction, depth)
       const convertedText = JSON.stringify(convertedObj, null, 2)
 
       setOriginal(jsonText)

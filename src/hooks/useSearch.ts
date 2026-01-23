@@ -1,6 +1,6 @@
 // src/hooks/useSearch.ts
 import { useState, useCallback } from 'react'
-import type { SearchState } from '@/types'
+import type { SearchState, JSONValue } from '@/types'
 
 // Helper function to generate node ID from path (matches treeFlattener)
 function generateNodeId(path: (string | number)[]): string {
@@ -9,14 +9,14 @@ function generateNodeId(path: (string | number)[]): string {
 
 // Search through entire JSON structure, not just visible nodes
 function searchJSON(
-  obj: any,
+  obj: JSONValue,
   query: string,
   path: (string | number)[] = []
 ): string[] {
   const matches: string[] = []
   const lowerQuery = query.toLowerCase()
 
-  function traverse(value: any, currentPath: (string | number)[]) {
+  function traverse(value: JSONValue, currentPath: (string | number)[]) {
     const nodeId = generateNodeId(currentPath)
 
     // Get the key (last segment of path)
@@ -53,7 +53,7 @@ function searchJSON(
   return matches
 }
 
-export function useSearch(parsedJson: any) {
+export function useSearch(parsedJson: JSONValue | null) {
   const [searchState, setSearchState] = useState<SearchState>({
     query: '',
     matchingNodeIds: [],
