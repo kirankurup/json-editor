@@ -1,8 +1,59 @@
 // src/hooks/useSearch.ts
 import { useState, useCallback } from 'react'
-import type { TreeNode, SearchState } from '@/types'
+import type { SearchState } from '@/types'
 
-export function useSearch(nodes: TreeNode[]) {
+// Helper function to generate node ID from path (matches treeFlattener)
+function generateNodeId(path: (string | number)[]): string {
+  return path.join('.')
+}
+
+// Search through entire JSON structure, not just visible nodes
+function searchJSON(
+  obj: any,
+  query: string,
+  path: (string | number)[] = []
+): string[] {
+  const matches: string[] = []
+  const lowerQuery = query.toLowerCase()
+
+  function traverse(value: any, currentPath: (string | number)[]) {
+    const nodeId = generateNodeId(currentPath)
+
+    // Get the key (last segment of path)
+    const key = currentPath.length > 0 ? String(currentPath[currentPath.length - 1]) : ''
+
+    // Check if key matches
+    if (key && key.toLowerCase().includes(lowerQuery)) {
+      matches.push(nodeId)
+    }
+
+    // Check if value matches (for primitives)
+    if (value !== null && typeof value !== 'object') {
+      const valueStr = String(value).toLowerCase()
+      if (valueStr.includes(lowerQuery) && !matches.includes(nodeId)) {
+        matches.push(nodeId)
+      }
+    }
+
+    // Recurse for objects and arrays
+    if (value !== null && typeof value === 'object') {
+      if (Array.isArray(value)) {
+        value.forEach((item, index) => {
+          traverse(item, [...currentPath, index])
+        })
+      } else {
+        Object.entries(value).forEach(([k, v]) => {
+          traverse(v, [...currentPath, k])
+        })
+      }
+    }
+  }
+
+  traverse(obj, path)
+  return matches
+}
+
+export function useSearch(parsedJson: any) {
   const [searchState, setSearchState] = useState<SearchState>({
     query: '',
     matchingNodeIds: [],
@@ -19,23 +70,15 @@ export function useSearch(nodes: TreeNode[]) {
       return
     }
 
-    const lowerQuery = query.toLowerCase()
-    const matching = nodes
-      .filter(node => {
-        const keyMatch = node.key.toLowerCase().includes(lowerQuery)
-        const valueMatch = typeof node.value === 'string'
-          ? node.value.toLowerCase().includes(lowerQuery)
-          : String(node.value).toLowerCase().includes(lowerQuery)
-        return keyMatch || valueMatch
-      })
-      .map(node => node.id)
+    // Search through entire JSON structure
+    const matching = parsedJson ? searchJSON(parsedJson, query) : []
 
     setSearchState({
       query,
       matchingNodeIds: matching,
       currentMatchIndex: matching.length > 0 ? 0 : -1,
     })
-  }, [nodes])
+  }, [parsedJson])
 
   const next = useCallback(() => {
     setSearchState(prev => {

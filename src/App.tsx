@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
+import { useState, useCallback, useEffect, useRef } from 'react'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { Header } from '@/components/Header'
 import { Toolbar } from '@/components/Toolbar'
@@ -15,7 +15,6 @@ import { useAutoRepair } from '@/hooks/useAutoRepair'
 import { useCaseConversion } from '@/hooks/useCaseConversion'
 import { PreviewModal } from '@/components/PreviewModal'
 import { CaseConversionDialog } from '@/components/CaseConversionDialog'
-import { flattenJSON } from '@/utils/treeFlattener'
 import type { CaseDirection, CaseDepth } from '@/types'
 import './App.css'
 
@@ -34,14 +33,8 @@ function App() {
     canUndo,
   } = useJsonEditor()
 
-  // Create base nodes for search (without expansion state)
-  const baseNodes = useMemo(() => {
-    if (!parsedJson) return []
-    return flattenJSON(parsedJson, new Set())
-  }, [parsedJson])
-
-  // Initialize search
-  const { searchState, currentMatchId, search, next, previous, clear } = useSearch(baseNodes)
+  // Initialize search with parsedJson (searches full tree, not just visible nodes)
+  const { searchState, currentMatchId, search, next, previous, clear } = useSearch(parsedJson)
 
   // Use tree state with search
   const {

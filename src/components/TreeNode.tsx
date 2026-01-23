@@ -45,20 +45,26 @@ export const TreeNode = memo(function TreeNode({
     }
 
     // Primitive value
-    const stringValue = JSON.stringify(value)
+    let stringValue = JSON.stringify(value)
+
+    // Replace newlines with escaped representation for display
+    // This prevents multi-line strings from breaking the layout
+    stringValue = stringValue.replace(/\n/g, '\\n').replace(/\r/g, '\\r').replace(/\t/g, '\\t')
+
     const displayValue = isTruncated && !isValueExpanded
       ? stringValue.substring(0, 100) + '...'
       : stringValue
 
     return (
-      <span className="text-green-600">
+      <span className="text-green-600 break-all">
         {displayValue}
         {isTruncated && (
           <button
             onClick={handleValueExpandClick}
-            className="ml-2 text-xs text-blue-600 hover:underline"
+            className="ml-2 text-xs text-blue-600 hover:underline inline-flex items-center"
+            aria-label={isValueExpanded ? 'Collapse value' : 'Expand value'}
           >
-            {isValueExpanded ? <Minimize2 className="inline w-3 h-3" /> : <Maximize2 className="inline w-3 h-3" />}
+            {isValueExpanded ? <Minimize2 className="w-3 h-3" /> : <Maximize2 className="w-3 h-3" />}
           </button>
         )}
       </span>
@@ -68,7 +74,7 @@ export const TreeNode = memo(function TreeNode({
   return (
     <div
       className={cn(
-        'flex items-start gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer transition-colors',
+        'flex items-start gap-2 py-1 px-2 hover:bg-gray-100 cursor-pointer transition-colors min-h-[28px]',
         isHighlighted && 'bg-yellow-100',
         isCurrentMatch && 'bg-yellow-200'
       )}
@@ -89,10 +95,12 @@ export const TreeNode = memo(function TreeNode({
           )}
         </button>
       )}
-      {type === 'primitive' && <div className="w-4" />}
+      {type === 'primitive' && <div className="w-4 flex-shrink-0" />}
 
-      <span className="text-blue-600 font-medium">{key}:</span>
-      {renderValue()}
+      <span className="text-blue-600 font-medium flex-shrink-0">{key}:</span>
+      <div className="flex-1 min-w-0">
+        {renderValue()}
+      </div>
     </div>
   )
 })
