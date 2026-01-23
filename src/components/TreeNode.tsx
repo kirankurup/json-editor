@@ -74,6 +74,7 @@ export const TreeNode = memo(function TreeNode({
       )}
       style={{ paddingLeft: `${depth * 20 + 8}px` }}
       onClick={handleRowClick}
+      data-node-id={id}
     >
       {type !== 'primitive' && (
         <button

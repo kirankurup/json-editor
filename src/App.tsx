@@ -1,5 +1,5 @@
 // src/App.tsx
-import { useState, useCallback, useEffect, useMemo } from 'react'
+import { useState, useCallback, useEffect, useMemo, useRef } from 'react'
 import { ResizablePanelGroup, ResizablePanel, ResizableHandle } from '@/components/ui/resizable'
 import { Header } from '@/components/Header'
 import { Toolbar } from '@/components/Toolbar'
@@ -22,6 +22,7 @@ import './App.css'
 function App() {
   const [showErrorBanner, setShowErrorBanner] = useState(true)
   const { toast } = useToast()
+  const treeViewRef = useRef<HTMLDivElement>(null)
 
   const {
     jsonText,
@@ -40,7 +41,7 @@ function App() {
   }, [parsedJson])
 
   // Initialize search
-  const { searchState, search, next, previous, clear } = useSearch(baseNodes)
+  const { searchState, currentMatchId, search, next, previous, clear } = useSearch(baseNodes)
 
   // Use tree state with search
   const {
@@ -48,6 +49,17 @@ function App() {
     toggleExpanded,
     toggleValueExpanded,
   } = useTreeState(parsedJson, searchState)
+
+  // Auto-scroll to current match
+  useEffect(() => {
+    if (currentMatchId && treeViewRef.current) {
+      // Find the element with the current match
+      const matchElement = treeViewRef.current.querySelector(`[data-node-id="${currentMatchId}"]`)
+      if (matchElement) {
+        matchElement.scrollIntoView({ behavior: 'smooth', block: 'center' })
+      }
+    }
+  }, [currentMatchId])
 
   const autoRepair = useAutoRepair()
   const caseConversion = useCaseConversion()
@@ -173,13 +185,15 @@ function App() {
         <ResizableHandle />
 
         <ResizablePanel defaultSize={50} minSize={30}>
-          <TreeView
-            nodes={nodes}
-            onToggleExpanded={toggleExpanded}
-            onToggleValueExpanded={toggleValueExpanded}
-            onCopyPath={handleCopyPath}
-            emptyMessage={emptyMessage}
-          />
+          <div ref={treeViewRef} className="h-full">
+            <TreeView
+              nodes={nodes}
+              onToggleExpanded={toggleExpanded}
+              onToggleValueExpanded={toggleValueExpanded}
+              onCopyPath={handleCopyPath}
+              emptyMessage={emptyMessage}
+            />
+          </div>
         </ResizablePanel>
       </ResizablePanelGroup>
 

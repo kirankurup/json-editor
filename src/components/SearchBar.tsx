@@ -1,5 +1,5 @@
 // src/components/SearchBar.tsx
-import { useState, useEffect } from 'react'
+import { useState, useEffect, KeyboardEvent } from 'react'
 import { Search, ChevronUp, ChevronDown, X } from 'lucide-react'
 import { Input } from '@/components/ui/input'
 import { Button } from '@/components/ui/button'
@@ -31,10 +31,28 @@ export function SearchBar({
     return () => clearTimeout(timer)
   }, [query, onSearch])
 
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter') {
+      e.preventDefault()
+      if (e.shiftKey) {
+        onPrevious()
+      } else {
+        onNext()
+      }
+    } else if (e.key === 'Escape') {
+      e.preventDefault()
+      setQuery('')
+      onClear()
+    }
+  }
+
   const handleClear = () => {
     setQuery('')
     onClear()
   }
+
+  const showResults = query.trim() !== ''
+  const hasMatches = matchCount > 0
 
   return (
     <div className="flex items-center gap-2 ml-auto">
@@ -45,7 +63,9 @@ export function SearchBar({
           placeholder="Search..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
+          onKeyDown={handleKeyDown}
           className="pl-9 pr-9 w-64 h-8"
+          aria-label="Search JSON keys and values"
         />
         {query && (
           <button
@@ -58,31 +78,34 @@ export function SearchBar({
         )}
       </div>
 
-      {matchCount > 0 && (
-        <span className="text-sm text-gray-600 min-w-20">
-          {currentIndex + 1} / {matchCount}
-        </span>
+      {showResults && (
+        <>
+          <span className="text-sm text-gray-600 min-w-20">
+            {hasMatches
+              ? `${currentIndex + 1} / ${matchCount}`
+              : '0 results'}
+          </span>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onPrevious}
+            disabled={!hasMatches}
+            aria-label="Previous match"
+          >
+            <ChevronUp className="w-4 h-4" />
+          </Button>
+
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={onNext}
+            disabled={!hasMatches}
+            aria-label="Next match"
+          >
+            <ChevronDown className="w-4 h-4" />
+          </Button>
+        </>
       )}
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onPrevious}
-        disabled={matchCount === 0}
-        aria-label="Previous match"
-      >
-        <ChevronUp className="w-4 h-4" />
-      </Button>
-
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={onNext}
-        disabled={matchCount === 0}
-        aria-label="Next match"
-      >
-        <ChevronDown className="w-4 h-4" />
-      </Button>
     </div>
   )
 }
