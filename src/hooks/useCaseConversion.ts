@@ -15,17 +15,32 @@ export function useCaseConversion() {
 
   const convert = useCallback((
     jsonText: string,
-    parsedJson: any,
+    parsedJson: unknown,
     direction: CaseDirection,
     depth: CaseDepth
   ) => {
-    const convertedObj = convertCaseUtil(parsedJson, direction, depth)
-    const convertedText = JSON.stringify(convertedObj, null, 2)
+    try {
+      // Validate parsedJson is an object
+      if (parsedJson === null || parsedJson === undefined) {
+        throw new Error('Cannot convert case: JSON is null or undefined')
+      }
 
-    setOriginal(jsonText)
-    setConverted(convertedText)
-    setIsDialogOpen(false)
-    setIsPreviewOpen(true)
+      if (typeof parsedJson !== 'object') {
+        throw new Error('Cannot convert case: JSON must be an object or array')
+      }
+
+      const convertedObj = convertCaseUtil(parsedJson, direction, depth)
+      const convertedText = JSON.stringify(convertedObj, null, 2)
+
+      setOriginal(jsonText)
+      setConverted(convertedText)
+      setIsDialogOpen(false)
+      setIsPreviewOpen(true)
+    } catch (error) {
+      // Close dialog and re-throw for App.tsx to handle with toast
+      setIsDialogOpen(false)
+      throw error
+    }
   }, [])
 
   const closeDialog = useCallback(() => {

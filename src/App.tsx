@@ -125,8 +125,16 @@ function App() {
   }, [parsedJson, caseConversion])
 
   const handleConvert = useCallback((direction: CaseDirection, depth: CaseDepth) => {
-    caseConversion.convert(jsonText, parsedJson, direction, depth)
-  }, [jsonText, parsedJson, caseConversion])
+    try {
+      caseConversion.convert(jsonText, parsedJson, direction, depth)
+    } catch (error) {
+      toast({
+        title: 'Case conversion failed',
+        description: error instanceof Error ? error.message : 'Could not convert JSON case',
+        variant: 'destructive',
+      })
+    }
+  }, [jsonText, parsedJson, caseConversion, toast])
 
   const handleAcceptConversion = useCallback(() => {
     applyMutation(caseConversion.converted)
