@@ -1,4 +1,5 @@
 // src/components/PreviewModal.tsx
+import { useMemo } from 'react'
 import { diffLines } from 'diff'
 import {
   Dialog,
@@ -26,7 +27,7 @@ export function PreviewModal({
   title,
   onAccept,
 }: PreviewModalProps) {
-  const diff = diffLines(original, modified)
+  const diff = useMemo(() => diffLines(original, modified), [original, modified])
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
